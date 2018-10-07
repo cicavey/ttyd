@@ -34,6 +34,8 @@ struct tty_client {
     char hostname[100];
     char address[50];
 
+    char *user_agent;
+
     struct lws *wsi;
     struct winsize size;
     char *buffer;

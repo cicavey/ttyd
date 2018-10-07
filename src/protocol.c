@@ -151,6 +151,9 @@ cleanup:
     if (client->buffer != NULL)
         free(client->buffer);
 
+    if (client->user_agent != NULL)
+        free(client->user_agent);
+
     pthread_mutex_destroy(&client->mutex);
 
     // remove from client list
@@ -175,6 +178,7 @@ thread_run_command(void *args) {
                 perror("setenv");
                 pthread_exit((void *) 1);
             }
+            setenv("UA", client->user_agent, true);
             if (execvp(server->argv[0], server->argv) < 0) {
                 perror("execvp");
                 pthread_exit((void *) 1);
@@ -219,7 +223,7 @@ int
 callback_tty(struct lws *wsi, enum lws_callback_reasons reason,
              void *user, void *in, size_t len) {
     struct tty_client *client = (struct tty_client *) user;
-    char buf[256];
+    char buf[1024];
     size_t n = 0;
 
     switch (reason) {
@@ -265,6 +269,14 @@ callback_tty(struct lws *wsi, enum lws_callback_reasons reason,
             lws_hdr_copy(wsi, buf, sizeof(buf), WSI_TOKEN_GET_URI);
 
             lwsl_notice("WS   %s - %s (%s), clients: %d\n", buf, client->address, client->hostname, server->client_count);
+
+            // Copy user-agent into client struct
+            n = lws_hdr_total_length(wsi, WSI_TOKEN_HTTP_USER_AGENT);
+            client->user_agent = xmalloc(n+1);
+            lws_hdr_copy(wsi, client->user_agent, n+1, WSI_TOKEN_HTTP_USER_AGENT);
+
+            lwsl_notice("USER AGENT?   %s\n", client->user_agent);
+
             break;
 
         case LWS_CALLBACK_SERVER_WRITEABLE:
