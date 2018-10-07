@@ -247,8 +247,8 @@ var openWs = function() {
             term.destroy();
         }
 
-        term = new Terminal({
-            fontSize: 13,
+        term = window.term = new Terminal({
+            fontSize: 16,
             fontFamily: '"Menlo for Powerline", Menlo, Consolas, "Liberation Mono", Courier, monospace',
             theme: {
                 foreground: '#d2d2d2',
