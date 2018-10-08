@@ -44,11 +44,12 @@ RUN apt-get update \
       apt-transport-https \
       software-properties-common \
       gpg-agent \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
-    && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
-    && apt-get update \
-    && apt-get install -y docker-ce \
     && rm -rf /var/lib/apt/lists/*
+
+ENV DOCKERVERSION=18.06.1-ce
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKERVERSION}.tgz \
+  && tar xzvf docker-${DOCKERVERSION}.tgz --strip 1 -C /usr/local/bin docker/docker \
+  && rm docker-${DOCKERVERSION}.tgz
 
 COPY --from=0 /usr/local/bin/ttyd /ttyd
 
